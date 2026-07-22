@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<!--
+  江宇梦 · 个人简历网站
+  技术栈：原生 HTML + CSS + JavaScript（单文件，CSS/JS 全部内嵌）
+  设计风格：Editorial Magazine × Scandinavian minimalism（编辑杂志 × 北欧极简）
+  使用方式：将本文件与头像图片（avatar.png / avatar.jpg / avatar.jpeg 任一）放在同一目录，双击即可在浏览器打开
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <!-- 移动端视口适配，确保手机端正常缩放与布局 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>江宇梦 · AI产品实习生 | 个人简历</title>
+  <meta name="description" content="江宇梦个人简历网站 - AI产品实习生" />
+
+  <!-- Google Fonts：标题衬线（EB Garamond + Noto Serif SC）+ 正文无衬线（Noto Sans SC）；离线时自动降级到系统字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ========================================
+       1. 设计令牌（CSS 变量）—— 配色 / 字体 / 间距
+       ======================================== */
+    :root {
+      /* 配色：暖米白底 + 深石墨灰主色 + 陶土橙点缀 */
+      --primary: #2C3E50;        /* 主色：深石墨蓝灰，用于标题、导航文字 */
+      --on-primary: #FFFFFF;
+      --accent: #E07A5F;         /* 强调色：低饱和陶土橙，激活态、序号、图标 */
+      --on-accent: #FFFFFF;
+      --background: #FAFAF7;      /* 页面背景：暖米白 */
+      --foreground: #1A1A1A;      /* 正文文字：近黑 */
+      --muted: #F0EDE6;          /* 辅助底色：浅暖灰 */
+      --border: #E5DDD0;         /* 描边：暖灰 */
+      --secondary: #6B7280;      /* 次要文字：中灰 */
+
+      /* 字体栈 */
+      --font-heading: "EB Garamond", "Noto Serif SC", "Songti SC", "STSong", serif;
+      --font-body: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+
+      /* 间距节奏（4px 基准） */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+      --space-7: 48px;
+      --space-8: 64px;
+
+      /* 动效 */
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --transition-fast: 200ms var(--ease);
+      --transition: 300ms var(--ease);
+    }
+
+    /* ========================================
+       2. 基础重置与全局样式
+       ======================================== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.7;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* 细滚动条，与暖灰配色统一 */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    *::-webkit-scrollbar { width: 8px; height: 8px; }
+    *::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    *::-webkit-scrollbar-track { background: transparent; }
+
+    /* ========================================
+       3. 顶部导航栏
+       ======================================== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200px;
+      height: 100vh;
+      z-index: 100;
+      background: rgba(250, 250, 247, 0.95);
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      border-right: 1px solid var(--border);
+      border-bottom: none;
+    }
+
+    .nav {
+      height: 100%;
+      padding: var(--space-6) var(--space-4);
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+
+    /* 左侧品牌：姓名 + 职位（衬线字体建立编辑感） */
+    .brand {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+      min-width: 0;
+    }
+    .brand-name {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.02em;
+    }
+    .brand-role {
+      font-size: 0.75rem;
+      color: var(--secondary);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 导航菜单（PC 端纵向排列） */
+    .nav-menu {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-1);
+      list-style: none;
+      width: 100%;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-2) var(--space-3);
+      font-size: 0.9rem;
+      color: var(--secondary);
+      text-decoration: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: color var(--transition-fast), background var(--transition-fast);
+      white-space: nowrap;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      width: 100%;
+    }
+    .nav-link:hover {
+      color: var(--primary);
+      background: var(--muted);
+    }
+    /* 激活态：橙色左侧竖线 + 主色文字 */
+    .nav-link.active {
+      color: var(--primary);
+      font-weight: 500;
+      background: var(--muted);
+    }
+    .nav-link.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 3px;
+      height: 60%;
+      background: var(--accent);
+      transform: translateY(-50%);
+      border-radius: 0 2px 2px 0;
+      animation: none;
+    }
+
+    /* 汉堡按钮（仅移动端显示） */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 44px;
+      height: 44px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 0 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .nav-toggle span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: var(--primary);
+      transition: transform var(--transition-fast), opacity var(--transition-fast);
+    }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ========================================
+       4. 主内容区与栏目切换
+       ======================================== */
+    .main {
+      max-width: 1200px;
+      margin-left: 200px;
+      padding: var(--space-7) var(--space-5) var(--space-8);
+    }
+
+    /* 栏目区块：默认隐藏，激活时淡入上移 */
+    .section {
+      display: none;
+      animation: sectionEnter var(--transition) var(--ease);
+    }
+    .section.active {
+      display: block;
+    }
+    @keyframes sectionEnter {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 栏目标题：序号 + 衬线标题 + 细线，编辑式排版签名 */
+    .section-title {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--border);
+    }
+    .section-num {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .section-heading {
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.01em;
+    }
+    .section-sub {
+      font-size: 0.8rem;
+      color: var(--secondary);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-left: auto;
+      align-self: center;
+    }
+
+    /* ========================================
+       5. 首页 / 个人简介
+       ======================================== */
+    .hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-7);
+      align-items: center;
+      margin-bottom: var(--space-7);
+    }
+
+    /* 头像容器：圆形，暖灰底 + 衬线首字占位 */
+    .avatar-wrap {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center 25%;
+      display: block;
+      border: 3px solid var(--background);
+      box-shadow: 0 4px 24px rgba(44, 62, 80, 0.12);
+    }
+    /* 占位样式：图片未加载时显示，衬线首字 + 暖灰渐变底，确保布局不塌陷 */
+    .avatar-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--muted) 0%, var(--border) 100%);
+      font-family: var(--font-heading);
+      font-size: 4rem;
+      font-weight: 600;
+      color: var(--primary);
+      border: 3px solid var(--background);
+      box-shadow: 0 4px 24px rgba(44, 62, 80, 0.12);
+    }
+    .avatar-placeholder.hidden { display: none; }
+
+    .hero-info { min-width: 0; }
+    .hero-name {
+      font-family: var(--font-heading);
+      font-size: 3rem;
+      font-weight: 600;
+      color: var(--primary);
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+      margin-bottom: var(--space-2);
+    }
+    .hero-intent {
+      font-size: 1.125rem;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: var(--space-3);
+    }
+    .hero-tag {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      font-size: 0.875rem;
+      color: var(--secondary);
+      margin-bottom: var(--space-4);
+    }
+    .hero-tag span {
+      display: inline-flex;
+      align-items: center;
+    }
+    .hero-tag span + span::before {
+      content: "·";
+      margin: 0 var(--space-2);
+      color: var(--border);
+    }
+
+    /* 基本信息网格 */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-3) var(--space-6);
+      margin-top: var(--space-5);
+      padding-top: var(--space-5);
+      border-top: 1px solid var(--border);
+    }
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .info-label {
+      font-size: 0.75rem;
+      color: var(--secondary);
+      letter-spacing: 0.05em;
+    }
+    .info-value {
+      font-size: 0.95rem;
+      color: var(--foreground);
+      font-weight: 500;
+    }
+
+    /* ========================================
+       6. 时间线（工作/项目经历）
+       ======================================== */
+    .timeline {
+      position: relative;
+      padding-left: var(--space-7);
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .tl-item {
+      position: relative;
+      margin-bottom: var(--space-7);
+    }
+    .tl-item:last-child { margin-bottom: 0; }
+    /* 时间轴节点：橙色圆点 */
+    .tl-item::before {
+      content: "";
+      position: absolute;
+      left: calc(-1 * var(--space-7) + 1px);
+      top: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--background);
+      border: 3px solid var(--accent);
+      box-sizing: border-box;
+    }
+
+    .tl-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-2) var(--space-4);
+      margin-bottom: var(--space-2);
+    }
+    .tl-title {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .tl-meta {
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .tl-sub {
+      font-size: 0.9rem;
+      color: var(--secondary);
+      margin-bottom: var(--space-3);
+    }
+    .tl-desc {
+      font-size: 0.92rem;
+      color: var(--foreground);
+      margin-bottom: var(--space-2);
+    }
+
+    /* 经历详情列表 */
+    .tl-list {
+      list-style: none;
+      margin-top: var(--space-2);
+    }
+    .tl-list li {
+      position: relative;
+      padding-left: var(--space-4);
+      font-size: 0.9rem;
+      color: var(--foreground);
+      margin-bottom: var(--space-2);
+      line-height: 1.65;
+    }
+    .tl-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.65em;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .tl-note {
+      margin-top: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--muted);
+      border-left: 3px solid var(--accent);
+      font-size: 0.88rem;
+      color: var(--primary);
+      border-radius: 0 6px 6px 0;
+    }
+
+    /* 经历分组小标题 */
+    .group-title {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin: var(--space-7) 0 var(--space-5);
+      padding-left: var(--space-3);
+      border-left: 3px solid var(--accent);
+    }
+    .group-title:first-of-type { margin-top: 0; }
+
+    /* ========================================
+       7. 教育背景卡片
+       ======================================== */
+    .edu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-5);
+    }
+    .edu-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: var(--space-6);
+      transition: box-shadow var(--transition), transform var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .edu-card:hover {
+      box-shadow: 0 8px 24px rgba(44, 62, 80, 0.08);
+      transform: translateY(-2px);
+    }
+    .edu-period {
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+    .edu-school {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .edu-major {
+      font-size: 0.95rem;
+      color: var(--foreground);
+    }
+    .edu-detail {
+      font-size: 0.88rem;
+      color: var(--secondary);
+      margin-top: var(--space-2);
+    }
+    .edu-honor {
+      display: inline-block;
+      margin-top: var(--space-3);
+      padding: 4px 10px;
+      background: var(--muted);
+      color: var(--primary);
+      font-size: 0.8rem;
+      border-radius: 4px;
+      align-self: flex-start;
+    }
+
+    /* ========================================
+       8. 技能特长
+       ======================================== */
+    .skill-group { margin-bottom: var(--space-7); }
+    .skill-group:last-child { margin-bottom: 0; }
+    .skill-group-title {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .skill-group-title::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .skill-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-4);
+    }
+    .skill-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: var(--space-5);
+      transition: box-shadow var(--transition), border-color var(--transition);
+    }
+    .skill-card:hover {
+      box-shadow: 0 6px 18px rgba(44, 62, 80, 0.07);
+      border-color: var(--accent);
+    }
+    .skill-head {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+    /* 技能图标：用 SVG 内联，避免外部依赖 */
+    .skill-icon {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+    .skill-name {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .skill-desc {
+      font-size: 0.88rem;
+      color: var(--secondary);
+      line-height: 1.6;
+      margin-bottom: var(--space-3);
+    }
+    /* 经验深度条：基于简历描述的相对经验可视化 */
+    .skill-bar-wrap {
+      margin-top: var(--space-2);
+    }
+    .skill-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--secondary);
+      margin-bottom: 4px;
+      letter-spacing: 0.03em;
+    }
+    .skill-bar {
+      height: 6px;
+      background: var(--muted);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .skill-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #F2A878);
+      border-radius: 3px;
+      width: 0;
+      transition: width 800ms var(--ease);
+    }
+
+    /* 软技能标签云 */
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+    .tag {
+      padding: 6px 14px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--primary);
+      transition: all var(--transition-fast);
+      cursor: default;
+    }
+    .tag:hover {
+      background: var(--accent);
+      color: var(--on-accent);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* 自我评价 */
+    .self-eval {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 12px 12px 0;
+      padding: var(--space-6);
+      font-size: 0.95rem;
+      color: var(--foreground);
+      line-height: 1.85;
+      text-indent: 2em;
+    }
+
+    /* ========================================
+       9. 证书 / 荣誉
+       ======================================== */
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: var(--space-4);
+    }
+    .cert-card {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: var(--space-4) var(--space-5);
+      transition: all var(--transition-fast);
+    }
+    .cert-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 6px 18px rgba(44, 62, 80, 0.07);
+      transform: translateY(-2px);
+    }
+    .cert-icon {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      color: var(--accent);
+    }
+    .cert-text { min-width: 0; }
+    .cert-name {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+    .cert-note {
+      font-size: 0.8rem;
+      color: var(--secondary);
+    }
+
+    /* ========================================
+       9.5 项目作品集
+       ======================================== */
+    .portfolio-intro {
+      font-size: 0.95rem;
+      color: var(--secondary);
+      margin-bottom: var(--space-6);
+      max-width: 65ch;
+    }
+    .portfolio-group {
+      margin-bottom: var(--space-7);
+    }
+    .portfolio-group:last-child { margin-bottom: 0; }
+    .portfolio-group-title {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: var(--space-2);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .portfolio-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .portfolio-desc {
+      font-size: 0.9rem;
+      color: var(--secondary);
+      margin-bottom: var(--space-5);
+      max-width: 70ch;
+    }
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-5);
+    }
+    .portfolio-item {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: box-shadow var(--transition), transform var(--transition);
+    }
+    .portfolio-item:hover {
+      box-shadow: 0 10px 28px rgba(44, 62, 80, 0.1);
+      transform: translateY(-3px);
+    }
+    .portfolio-img-wrap {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--muted);
+      overflow: hidden;
+    }
+    .portfolio-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 500ms var(--ease);
+    }
+    .portfolio-item:hover .portfolio-img-wrap img {
+      transform: scale(1.03);
+    }
+    .portfolio-info {
+      padding: var(--space-4) var(--space-5);
+    }
+    .portfolio-name {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .portfolio-note {
+      font-size: 0.85rem;
+      color: var(--secondary);
+      line-height: 1.6;
+    }
+
+    /* ========================================
+       10. 页脚
+       ======================================== */
+    .footer {
+      margin-left: 200px;
+      border-top: 1px solid var(--border);
+      padding: var(--space-5) var(--space-5);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--secondary);
+    }
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ========================================
+       11. 移动端汉堡菜单抽屉
+       ======================================== */
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 80%;
+      max-width: 320px;
+      height: 100vh;
+      background: var(--background);
+      border-left: 1px solid var(--border);
+      box-shadow: -8px 0 32px rgba(44, 62, 80, 0.1);
+      z-index: 200;
+      transition: right var(--transition);
+      padding: var(--space-7) var(--space-5);
+      overflow-y: auto;
+    }
+    .drawer.open { right: 0; }
+    .drawer-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+    .drawer-link {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: var(--secondary);
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+    .drawer-link:hover { background: var(--muted); color: var(--primary); }
+    .drawer-link.active { color: var(--primary); background: var(--muted); font-weight: 500; }
+    .drawer-num {
+      font-family: var(--font-heading);
+      color: var(--accent);
+      font-size: 0.85rem;
+      min-width: 24px;
+    }
+
+    /* 遮罩 */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(44, 62, 80, 0.4);
+      z-index: 150;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+    }
+    .overlay.show { opacity: 1; visibility: visible; }
+
+    /* ========================================
+       12. 响应式适配（768px 断点）
+       ======================================== */
+    @media (max-width: 768px) {
+      :root {
+        --space-7: 32px;
+        --space-8: 48px;
+      }
+
+      /* PC 导航隐藏，显示汉堡按钮 */
+      .header { display: none !important; }
+      .nav-menu { display: none !important; }
+      #navToggle { 
+        display: flex !important; 
+        position: fixed !important; 
+        top: 12px !important; 
+        right: 16px !important; 
+        z-index: 9999 !important; 
+        background: #FFFFFF !important; 
+        border: 1px solid #E5DDD0 !important; 
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+      }
+
+      .main { margin-left: 0; padding: var(--space-5) var(--space-4) var(--space-7); padding-top: calc(var(--space-5) + 52px); }
+      .footer { margin-left: 0; }
+
+      /* Hero 改为单列，头像居中 */
+      .hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: var(--space-5);
+      }
+      .avatar-wrap { width: 120px; height: 120px; margin: 0 auto; }
+      .avatar-placeholder { font-size: 3rem; }
+      .hero-name { font-size: 2.25rem; }
+      .hero-tag { justify-content: center; }
+      .info-grid { grid-template-columns: 1fr; gap: var(--space-3); }
+
+      /* 标题缩放 */
+      .section-title { flex-wrap: wrap; gap: var(--space-2); }
+      .section-num { font-size: 2rem; }
+      .section-heading { font-size: 1.4rem; }
+      .section-sub { margin-left: 0; width: 100%; }
+
+      /* 时间线节点间距收紧 */
+      .timeline { padding-left: var(--space-6); }
+      .tl-item::before { left: calc(-1 * var(--space-6) + 1px); }
+      .tl-head { flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+      .tl-meta { font-size: 0.75rem; }
+
+      .group-title { font-size: 1rem; margin-top: var(--space-6); }
+
+      .edu-card { padding: var(--space-5); }
+      .skill-list { grid-template-columns: 1fr; }
+      .self-eval { padding: var(--space-5); font-size: 0.9rem; }
+      .cert-grid { grid-template-columns: 1fr; }
+      .portfolio-grid { grid-template-columns: 1fr; }
+      .portfolio-group-title { font-size: 1.05rem; }
+    }
+
+    @media (max-width: 380px) {
+      .hero-name { font-size: 1.9rem; }
+      .section-num { font-size: 1.75rem; }
+      .section-heading { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ 顶部导航 ============ -->
+  <header class="header">
+    <nav class="nav">
+      <div class="brand">
+        <span class="brand-name">江宇梦</span>
+        <span class="brand-role">AI产品实习生</span>
+      </div>
+
+      <!-- PC 端横向导航 -->
+      <ul class="nav-menu" id="navMenu">
+        <li class="nav-item"><button class="nav-link active" data-target="home">首页</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="experience">经历</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="portfolio">作品集</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="education">教育</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="skills">技能</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="certificates">证书</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- 移动端汉堡按钮（置于header外部，确保移动端可见） -->
+  <button class="nav-toggle" id="navToggle" aria-label="打开菜单">
+    <span></span><span></span><span></span>
+  </button>
+
+  <!-- ============ 移动端抽屉菜单 ============ -->
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer">
+    <ul class="drawer-list" id="drawerList">
+      <li><button class="drawer-link active" data-target="home"><span class="drawer-num">01</span>首页 / 个人简介</button></li>
+      <li><button class="drawer-link" data-target="experience"><span class="drawer-num">02</span>工作 / 项目经历</button></li>
+      <li><button class="drawer-link" data-target="portfolio"><span class="drawer-num">03</span>项目作品集</button></li>
+      <li><button class="drawer-link" data-target="education"><span class="drawer-num">04</span>教育背景</button></li>
+      <li><button class="drawer-link" data-target="skills"><span class="drawer-num">05</span>技能特长</button></li>
+      <li><button class="drawer-link" data-target="certificates"><span class="drawer-num">06</span>证书 / 荣誉</button></li>
+    </ul>
+  </aside>
+
+  <!-- ============ 主内容区 ============ -->
+  <main class="main">
+
+    <!-- ====== 栏目 1：首页 / 个人简介 ====== -->
+    <section class="section active" id="home">
+      <div class="hero">
+        <!-- 头像：默认使用本地 avatar.jpg，加载失败时显示占位 -->
+        <div class="avatar-wrap">
+  <div class="avatar-placeholder hidden" id="avatarPlaceholder">江</div>
+  <img class="avatar" id="avatar" src="avatar.jpg" alt="江宇梦个人证件照" />
+</div>
+
+        <div class="hero-info">
+          <h1 class="hero-name">江宇梦</h1>
+          <p class="hero-intent">求职意向：AI产品实习生</p>
+          <div class="hero-tag">
+            <span>AI产品设计</span>
+            <span>需求分析</span>
+            <span>产品原型开发</span>
+            <span>AI交互体验设计</span>
+            <span>大模型应用</span>
+            <span>Prompt工程</span>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">性别 / 出生年月</span>
+              <span class="info-value">女 · 2001.04</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">籍贯</span>
+              <span class="info-value">江西南昌</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">可到岗时间</span>
+              <span class="info-value">一周内全职到岗</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">实习安排</span>
+              <span class="info-value">可连续3个月+</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">联系电话：15180170584</span>
+              <span class="info-value">—</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">电子邮箱：1670548434@qq.com</span>
+              <span class="info-value">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 栏目 2：工作 / 项目经历 ====== -->
+    <section class="section" id="experience">
+      <div class="section-title">
+        <span class="section-num">02</span>
+        <h2 class="section-heading">工作 / 项目经历</h2>
+        <span class="section-sub">Experience</span>
+      </div>
+
+      <!-- 项目经历 -->
+      <h3 class="group-title">项目经历</h3>
+      <div class="timeline">
+        <!-- 项目 1 -->
+        <div class="tl-item">
+          <div class="tl-head">
+            <span class="tl-title">轻量化工具独立开发 · Vibe Coding</span>
+            <span class="tl-meta">个人独立项目</span>
+          </div>
+          <div class="tl-sub">从想法到原型独立跑通，完成4款工具的需求分析、功能设计与交互优化</div>
+          <ul class="tl-list">
+            <li><strong>个人主页：</strong>搭建页面结构与交互逻辑，完成可视化展示与上线，具备独立输出可演示产品原型能力</li>
+            <li><strong>在线书签工具：</strong>基于Spec驱动开发，设计数据存储与标签检索功能，注重用户信息架构与交互细节</li>
+            <li><strong>待办清单系统：</strong>实现任务新增、进度标记与日常追踪功能，关注用户路径与体验细节设计</li>
+            <li><strong>习惯打卡工具：</strong>界面简洁，专注打卡核心功能，避免复杂功能干扰，体现产品极简设计思维</li>
+          </ul>
+          <div class="tl-note">项目收获：掌握从用户需求到产品落地的完整链路，具备独立使用开发工具搭建产品原型的能力，积累了产品设计与用户体验优化经验。</div>
+        </div>
+
+        <!-- 项目 2 -->
+        <div class="tl-item">
+          <div class="tl-head">
+            <span class="tl-title">AI产品设计项目 · 机械臂创想工坊</span>
+            <span class="tl-meta">独立产品设计</span>
+          </div>
+          <div class="tl-sub">从0到1搭建AI+硬件产品化课程体系，完成需求分析、功能设计与交互流程优化，输出标准化产品文档</div>
+          <ul class="tl-list">
+            <li><strong>需求分析与产品规划：</strong>调研用户需求，撰写产品概要与功能设计文档，确定产品目标与验收标准，搭建标准化产品框架</li>
+            <li><strong>交互流程设计：</strong>设计用户学习路径与操作流程，制作3套专题设计方案，注重用户体验与信息架构设计</li>
+            <li><strong>流程标准化与迭代：</strong>设计产品交互流程并固化操作步骤，积累了流程设计与交互优化经验，可迁移至AI产品交互设计与迭代</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 学生实践经历 -->
+      <h3 class="group-title">学生实践经历</h3>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-head">
+            <span class="tl-title">用户研究与需求分析实践</span>
+            <span class="tl-meta">豫章初级中学、南昌市育新学校</span>
+          </div>
+          <div class="tl-sub">半年全职实践 · 获评优秀实习生</div>
+          <ul class="tl-list">
+            <li>深入一线用户场景，收集用户需求与痛点反馈，积累真实用户调研与问题分析经验</li>
+            <li>设计适配用户认知的交互流程，为产品优化、BadCase分析提供一线用户视角</li>
+            <li>具备用户需求挖掘与场景化分析能力，可快速理解不同用户群体的核心诉求</li>
+          </ul>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-head">
+            <span class="tl-title">用户调研与产品落地 · 学院生活权益部副部长</span>
+            <span class="tl-meta">2024–2025学年</span>
+          </div>
+          <ul class="tl-list">
+            <li>搭建多渠道用户调研体系，完成用户需求收集、归类分析、排期落地；具备产品数据跟踪、负面案例复盘分析能力</li>
+            <li>协调跨部门资源推进需求落地，积累了需求优先级评估与项目推进经验</li>
+          </ul>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-head">
+            <span class="tl-title">知识体系搭建 · 校政研室学生助理</span>
+            <span class="tl-meta">2025.02–2025.07</span>
+          </div>
+          <ul class="tl-list">
+            <li>完成文献资料整理与结构化汇编，具备知识库搭建能力；可整理Prompt策略与素材，支持AI产品迭代优化</li>
+            <li>具备行业资料调研与信息整合能力，可为产品决策提供数据支撑</li>
+          </ul>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-head">
+            <span class="tl-title">多媒体内容创作负责人</span>
+            <span class="tl-meta">2023.05</span>
+          </div>
+          <ul class="tl-list">
+            <li>完成音视频内容制作，依据用户认知调整内容节奏，具备分层内容设计与交互体验优化能力</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 社会实践经历 -->
+      <h3 class="group-title">社会实践经历</h3>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-head">
+            <span class="tl-title">新东方教育机构 · 授课教师</span>
+            <span class="tl-meta">2021.07–2021.08</span>
+          </div>
+          <ul class="tl-list">
+            <li>开展K12授课与课后辅导，熟悉用户易错场景与需求，可反向优化产品交互逻辑与输出质量</li>
+          </ul>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-head">
+            <span class="tl-title">客服 / 销售多岗实践</span>
+            <span class="tl-meta">2022.07–2022.08</span>
+          </div>
+          <ul class="tl-list">
+            <li>通过深度沟通了解用户诉求，业绩表现靠前，培养了从用户视角思考产品问题的习惯，具备用户洞察能力</li>
+          </ul>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-head">
+            <span class="tl-title">公益活动 · 志愿者</span>
+            <span class="tl-meta">2024.09–2025.06</span>
+          </div>
+          <ul class="tl-list">
+            <li>参与线下服务活动，了解用户实际需求与痛点，积累跨场景用户调研经验</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 栏目 3：教育背景 ====== -->
+    <section class="section" id="education">
+      <div class="section-title">
+        <span class="section-num">03</span>
+        <h2 class="section-heading">教育背景</h2>
+        <span class="section-sub">Education</span>
+      </div>
+
+      <div class="edu-grid">
+        <div class="edu-card">
+          <span class="edu-period">2024.09 – 2027.07</span>
+          <h3 class="edu-school">南昌大学</h3>
+          <p class="edu-major">现代教育技术 · 硕士研究生</p>
+          <p class="edu-detail">主修方向：AI技术应用、智慧教学环境建构、交互设计、数据驱动产品优化、教育技术理论</p>
+        </div>
+
+        <div class="edu-card">
+          <span class="edu-period">2022.09 – 2024.07</span>
+          <h3 class="edu-school">井冈山大学</h3>
+          <p class="edu-major">学前教育 · 本科</p>
+          <p class="edu-detail">用户认知发展理论、课程设计方法论、心理学基础、跨学科沟通协作能力培养</p>
+               </div>
+      </div>
+    </section>
+
+    <!-- ====== 栏目 4：技能特长 ====== -->
+    <section class="section" id="skills">
+      <div class="section-title">
+        <span class="section-num">04</span>
+        <h2 class="section-heading">技能特长</h2>
+        <span class="section-sub">Skills</span>
+      </div>
+
+      <!-- 核心专业能力（硬技能） -->
+      <div class="skill-group">
+        <h3 class="skill-group-title">核心专业能力</h3>
+        <div class="skill-list">
+          <div class="skill-card">
+            <div class="skill-head">
+              <span class="skill-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              </span>
+              <span class="skill-name">产品流程设计</span>
+            </div>
+            <p class="skill-desc">拥有完整产品从0到1搭建经验，可设计标准化流程与交互框架，注重用户体验与信息架构设计</p>
+            <div class="skill-bar-wrap">
+              <div class="skill-bar-label"><span>经验深度</span><span>精通</span></div>
+              <div class="skill-bar"><div class="skill-bar-fill" data-width="90%"></div></div>
+            </div>
+          </div>
+
+          <div class="skill-card">
+            <div class="skill-head">
+              <span class="skill-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+              </span>
+              <span class="skill-name">案例分析</span>
+            </div>
+            <p class="skill-desc">可完成用户反馈、BadCase拆解与需求整理，定位产品逻辑问题并提出改进方案</p>
+            <div class="skill-bar-wrap">
+              <div class="skill-bar-label"><span>经验深度</span><span>熟练</span></div>
+              <div class="skill-bar"><div class="skill-bar-fill" data-width="80%"></div></div>
+            </div>
+          </div>
+
+          <div class="skill-card">
+            <div class="skill-head">
+              <span class="skill-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              </span>
+              <span class="skill-name">AI技术应用</span>
+            </div>
+            <p class="skill-desc">具备AI技术认知（大模型、语音交互），能将技术与场景有效结合，可独立搭建产品原型</p>
+            <div class="skill-bar-wrap">
+              <div class="skill-bar-label"><span>经验深度</span><span>熟练</span></div>
+              <div class="skill-bar"><div class="skill-bar-fill" data-width="85%"></div></div>
+            </div>
+          </div>
+
+          <div class="skill-card">
+            <div class="skill-head">
+              <span class="skill-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              </span>
+              <span class="skill-name">资料与知识库</span>
+            </div>
+            <p class="skill-desc">可搭建产品知识库、整理Prompt策略与素材、阅读英文行业资料，支持AI产品迭代</p>
+            <div class="skill-bar-wrap">
+              <div class="skill-bar-label"><span>经验深度</span><span>熟练</span></div>
+              <div class="skill-bar"><div class="skill-bar-fill" data-width="85%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 软技能 -->
+      <div class="skill-group">
+        <h3 class="skill-group-title">综合素养</h3>
+        <div class="tag-cloud">
+          <span class="tag">跨部门沟通协作</span>
+          <span class="tag">用户视角洞察</span>
+          <span class="tag">快速学习适应</span>
+          <span class="tag">产品交互设计</span>
+          <span class="tag">AI交互体验设计</span>
+          <span class="tag">需求拆解能力</span>
+          <span class="tag">英文行业资料阅读</span>
+          <span class="tag">独立产品原型搭建</span>
+          <span class="tag">数据驱动优化</span>
+        </div>
+      </div>
+
+      <!-- 自我评价 -->
+      <div class="skill-group">
+        <h3 class="skill-group-title">自我评价</h3>
+        <p class="self-eval">具备完整产品从0到1搭建经验，拥有轻量化工具独立开发和标准化流程设计能力。具备AI技术认知（大模型、语音交互、NLP），能将技术与业务场景有效结合；擅长用户需求挖掘与BadCase分析，可独立搭建产品原型并完成交互体验设计。具备用户认知心理学基础，能从用户视角设计交互流程；学习能力强，逻辑清晰，一周内可入职，期望参与AI产品的需求挖掘、规划设计与迭代优化工作。</p>
+      </div>
+    </section>
+
+    <!-- ====== 栏目 5：项目作品集 ====== -->
+    <section class="section" id="portfolio">
+      <div class="section-title">
+        <span class="section-num">05</span>
+        <h2 class="section-heading">项目作品集</h2>
+        <span class="section-sub">Portfolio</span>
+      </div>
+
+      <p class="portfolio-intro">展示独立开发的轻量化工具产品与产品化课程设计成果，体现从需求挖掘到原型落地的完整能力。</p>
+
+      <!-- 作品组 1：Vibe Coding 工具集 -->
+      <div class="portfolio-group">
+        <h3 class="portfolio-group-title">
+          <span class="portfolio-dot"></span>
+          轻量化工具独立开发 · Vibe Coding
+        </h3>
+        <p class="portfolio-desc">独立完成 4 款工具全流程开发，覆盖需求梳理、功能逻辑设计与交互体验优化。</p>
+        <div class="portfolio-grid">
+          <div class="portfolio-item">
+            <div class="portfolio-img-wrap">
+              <img src="https://miaoda-conversation-file.cdn.bcebos.com/user-cw8h2myf4m4g/app-d523s68smbk4/20260720/16fc8c2bf4565c7384cd890540f3c583_1784533462664.png" alt="待办清单工具截图" loading="lazy" />
+            </div>
+            <div class="portfolio-info">
+              <h4 class="portfolio-name">待办清单系统</h4>
+              <p class="portfolio-note">任务新增、进度标记、追踪日常待办事项。</p>
+            </div>
+          </div>
+
+          <div class="portfolio-item">
+            <div class="portfolio-img-wrap">
+              <img src="https://miaoda-conversation-file.cdn.bcebos.com/user-cw8h2myf4m4g/app-d523s68smbk4/20260720/6023a96944349226d7797091cca84e98_1784533467975.png" alt="我的书摘工具截图" loading="lazy" />
+            </div>
+            <div class="portfolio-info">
+              <h4 class="portfolio-name">我的书摘</h4>
+              <p class="portfolio-note">收藏分类、划线管理与快速检索，记录阅读过程中的好句子。</p>
+            </div>
+          </div>
+
+          <div class="portfolio-item">
+            <div class="portfolio-img-wrap">
+              <img src="https://miaoda-conversation-file.cdn.bcebos.com/user-cw8h2myf4m4g/app-d523s68smbk4/20260720/52e36366a3c03f92f851c34ed2240c3f_1784533476693.png" alt="习惯打卡工具截图" loading="lazy" />
+            </div>
+            <div class="portfolio-info">
+              <h4 class="portfolio-name">习惯打卡工具</h4>
+              <p class="portfolio-note">界面简洁,操作便捷,专注于打卡本身,避免复杂功能干扰用户坚持。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 作品组 2：STEAM 机械臂创想工坊 -->
+      <div class="portfolio-group">
+        <h3 class="portfolio-group-title">
+          <span class="portfolio-dot"></span>
+          STEAM科创课程全流程开发 · 机械臂创想工坊
+        </h3>
+        <p class="portfolio-desc">独立搭建整套机械臂科创课程体系，输出教学设计文档 + 授课 PPT，完成教学 SOP 设计。</p>
+        <div class="portfolio-grid">
+          <div class="portfolio-item">
+            <div class="portfolio-img-wrap">
+              <img src="https://miaoda-conversation-file.cdn.bcebos.com/user-cw8h2myf4m4g/app-d523s68smbk4/20260720/image_1784533660106.png" alt="机械臂课程目录设计" loading="lazy" />
+            </div>
+            <div class="portfolio-info">
+              <h4 class="portfolio-name">课程目录设计</h4>
+              <p class="portfolio-note">《机械臂创想工坊》STEAM 微型课程活动设计目录。</p>
+            </div>
+          </div>
+
+          <div class="portfolio-item">
+            <div class="portfolio-img-wrap">
+              <img src="https://miaoda-conversation-file.cdn.bcebos.com/user-cw8h2myf4m4g/app-d523s68smbk4/20260720/image_1784533703240.png" alt="机械臂课程概要设计" loading="lazy" />
+            </div>
+            <div class="portfolio-info">
+              <h4 class="portfolio-name">课程概要设计</h4>
+              <p class="portfolio-note">课程基本信息、授课方式、教学目标与行为表现目标。</p>
+            </div>
+          </div>
+
+          <div class="portfolio-item">
+            <div class="portfolio-img-wrap">
+              <img src="https://miaoda-conversation-file.cdn.bcebos.com/user-cw8h2myf4m4g/app-d523s68smbk4/20260720/image_1784533734756.png" alt="机械臂课程PPT课件" loading="lazy" />
+            </div>
+            <div class="portfolio-info">
+              <h4 class="portfolio-name">分课时课件</h4>
+              <p class="portfolio-note">探索者机械臂套件初识、硬件组装、基础编程控制专题 PPT。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 栏目 6：证书 / 荣誉 ====== -->
+    <section class="section" id="certificates">
+      <div class="section-title">
+        <span class="section-num">06</span>
+        <h2 class="section-heading">证书 / 荣誉</h2>
+        <span class="section-sub">Certificates</span>
+      </div>
+
+      <div class="cert-grid">
+        <div class="cert-card">
+          <svg class="cert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <div class="cert-text">
+            <p class="cert-name">中小学教师资格证</p>
+            <p class="cert-note">教育行业从业资质</p>
+          </div>
+        </div>
+
+        <div class="cert-card">
+          <svg class="cert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <div class="cert-text">
+            <p class="cert-name">计算机二级证书</p>
+            <p class="cert-note">Excel 数据统计、函数处理</p>
+          </div>
+        </div>
+
+        <div class="cert-card">
+          <svg class="cert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <div class="cert-text">
+            <p class="cert-name">大学英语四级 / 六级</p>
+            <p class="cert-note">具备英文行业资料阅读能力</p>
+          </div>
+        </div>
+
+        <div class="cert-card">
+          <svg class="cert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <div class="cert-text">
+            <p class="cert-name">优秀实习生</p>
+            <p class="cert-note">初中一线教学实习获评</p>
+          </div>
+        </div>
+
+        <div class="cert-card">
+          <svg class="cert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          <div class="cert-text">
+            <p class="cert-name">校级一等奖学金</p>
+                    </div>
+        </div>
+
+        <div class="cert-card">
+          <svg class="cert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          <div class="cert-text">
+            <p class="cert-name">校级二等奖学金</p>
+    
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ 页脚 ============ -->
+  <footer class="footer">
+    <p>© 2026 江宇梦 · 个人简历网站</p>
+  </footer>
+
+  <script>
+    /* ========================================================
+       JavaScript 交互逻辑
+       1. 头像优先级探测加载
+       2. 栏目切换（单页应用，显隐控制 + 淡入动效）
+       3. 移动端汉堡菜单抽屉
+       4. 技能进度条入场动画
+       ======================================================== */
+
+    /* ---------- 1. 头像加载函数 ----------
+       优先显示 <img> 标签中已设置的 src（默认 avatar.jpg）。
+       若该图片加载失败，则按 avatar.png → avatar.jpg → avatar.jpeg 优先级探测，
+       任一成功即设为头像源并隐藏占位；全部失败则保留占位样式，布局不塌陷。
+    */
+    (function loadAvatar() {
+      var avatar = document.getElementById('avatar');
+      var placeholder = document.getElementById('avatarPlaceholder');
+      var initialSrc = avatar.getAttribute('src');
+
+      // 当前 src 成功时的统一处理
+      function useAvatar(src) {
+        avatar.src = src;
+        avatar.style.display = 'block';
+        placeholder.classList.add('hidden');
+      }
+
+      // 已有 src 时先验证；为空则直接走探测流程
+      if (initialSrc) {
+        var initialTester = new Image();
+        initialTester.onload = function () { useAvatar(initialSrc); };
+        initialTester.onerror = probeAvatar;
+        initialTester.src = initialSrc;
+      } else {
+        probeAvatar();
+      }
+
+      function probeAvatar() {
+        var candidates = ['avatar.png', 'avatar.jpg', 'avatar.jpeg'];
+        var index = 0;
+        function tryNext() {
+          if (index >= candidates.length) return; // 全部失败，保留占位
+          var src = candidates[index];
+          index++;
+          var tester = new Image();
+          tester.onload = function () { useAvatar(src); };
+          tester.onerror = tryNext;
+          tester.src = src;
+        }
+        tryNext();
+      }
+    })();
+
+    /* ---------- 2. 栏目切换逻辑 ----------
+       点击导航项切换对应内容区块，同一时间仅显示一个区块
+       支持顶部导航与移动端抽屉菜单联动
+    */
+    var navLinks = document.querySelectorAll('.nav-link, .drawer-link');
+    var sections = document.querySelectorAll('.section');
+
+    function switchSection(targetId) {
+      // 隐藏所有区块
+      sections.forEach(function (s) { s.classList.remove('active'); });
+      // 显示目标区块（重置动画以触发淡入）
+      var target = document.getElementById(targetId);
+      if (target) {
+        target.classList.add('active');
+        // 触发重排以重新播放入场动画
+        target.style.animation = 'none';
+        void target.offsetWidth;
+        target.style.animation = '';
+      }
+      // 更新导航激活态
+      navLinks.forEach(function (l) {
+        l.classList.toggle('active', l.dataset.target === targetId);
+      });
+      // 滚动回顶部
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // 触发该区块技能进度条动画
+      animateSkillBars(targetId);
+    }
+
+    navLinks.forEach(function (link) {
+      link.addEventListener('click', function () {
+        switchSection(this.dataset.target);
+        // 移动端：点击后关闭抽屉
+        closeDrawer();
+      });
+    });
+
+    /* ---------- 3. 移动端汉堡菜单抽屉 ---------- */
+    var navToggle = document.getElementById('navToggle');
+    var drawer = document.getElementById('drawer');
+    var overlay = document.getElementById('overlay');
+
+    function openDrawer() {
+      drawer.classList.add('open');
+      overlay.classList.add('show');
+      navToggle.classList.add('open');
+    }
+    function closeDrawer() {
+      drawer.classList.remove('open');
+      overlay.classList.remove('show');
+      navToggle.classList.remove('open');
+    }
+    navToggle.addEventListener('click', function () {
+      if (drawer.classList.contains('open')) closeDrawer();
+      else openDrawer();
+    });
+    overlay.addEventListener('click', closeDrawer);
+
+    /* ---------- 4. 技能进度条入场动画 ----------
+       当技能区块显示时，将进度条填充至目标宽度
+    */
+    function animateSkillBars(sectionId) {
+      if (sectionId !== 'skills') return;
+      var bars = document.querySelectorAll('#skills .skill-bar-fill');
+      bars.forEach(function (bar) {
+        bar.style.width = '0';
+        // 延迟触发，确保 transition 生效
+        setTimeout(function () {
+          bar.style.width = bar.dataset.width;
+        }, 50);
+      });
+    }
+
+    /* ---------- 5. 作品集图片 Lightbox 预览 ----------
+       点击图片放大查看，背景遮罩点击关闭
+    */
+    var lightbox = null;
+    function initLightbox() {
+      if (lightbox) return;
+      lightbox = document.createElement('div');
+      lightbox.className = 'lightbox';
+      lightbox.innerHTML = '<span class="lightbox-close" aria-label="关闭">×</span><img alt="作品大图预览" />';
+      document.body.appendChild(lightbox);
+
+      // 样式内联注入，避免单文件 CSS 膨胀
+      var s = document.createElement('style');
+      s.textContent = '.lightbox{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;background:rgba(44,62,80,.92);padding:var(--space-5);opacity:0;transition:opacity .25s var(--ease)}.lightbox.show{display:flex;opacity:1}.lightbox img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 16px 48px rgba(0,0,0,.35)}.lightbox-close{position:absolute;top:20px;right:24px;font-size:2rem;color:#fff;cursor:pointer;line-height:1}';
+      document.head.appendChild(s);
+
+      lightbox.addEventListener('click', function (e) {
+        if (e.target !== lightbox.querySelector('img')) {
+          lightbox.classList.remove('show');
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') lightbox.classList.remove('show');
+      });
+    }
+
+    function openLightbox(src) {
+      initLightbox();
+      lightbox.querySelector('img').src = src;
+      lightbox.classList.add('show');
+    }
+
+    // 为作品集图片绑定点击放大
+    document.querySelectorAll('.portfolio-img-wrap img').forEach(function (img) {
+      img.addEventListener('click', function () { openLightbox(this.src); });
+      img.style.cursor = 'zoom-in';
+    });
+
+    // 首屏若默认在首页则无需触发；切到技能页时由 switchSection 触发
+    // 若初始就需展示技能条（如直接 hash 访问），此处兜底
+    if (document.querySelector('#skills.active')) {
+      animateSkillBars('skills');
+    }
+
+    /* ---------- 5. 响应式：窗口变化时关闭抽屉（避免 PC 端残留） ---------- */
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 768) closeDrawer();
+    });
+
+    /* ---------- 6. 键盘可访问性：ESC 关闭抽屉 ---------- */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+  </script>
+</body>
+</html>
