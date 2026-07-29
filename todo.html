@@ -106,12 +106,22 @@
     .input-row1 input[type="text"]:focus { border-color: #667eea; }
 
     .input-row2 { display: flex; gap: 10px; align-items: center; }
-    .input-row2 input[type="time"] {
-      padding: 8px 10px; font-size: 14px;
-      border: 2px solid #e3e0f0; border-radius: 8px; outline: none;
-      color: #555; font-family: inherit;
+    .time-picker {
+      position: relative;
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 12px; font-size: 14px;
+      border: 2px solid #e3e0f0; border-radius: 8px;
+      background: #fff; color: #555; cursor: pointer;
+      transition: border-color 0.2s; user-select: none;
     }
-    .input-row2 input[type="time"]:focus { border-color: #667eea; }
+    .time-picker:hover { border-color: #667eea; }
+    .time-picker.active { border-color: #667eea; color: #667eea; }
+    .time-picker input[type="time"] {
+      position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; border: 0;
+    }
+    .time-picker .time-icon { font-size: 15px; }
+    .time-picker .time-text { white-space: nowrap; }
     .imp-toggle {
       display: flex; align-items: center; gap: 5px;
       font-size: 14px; color: #666; cursor: pointer; user-select: none;
@@ -266,7 +276,11 @@
           <input type="text" id="taskInput" placeholder="要做什么？按回车快速添加" maxlength="100" />
         </div>
         <div class="input-row2">
-          <input type="time" id="timeInput" title="计划时间（可不填）" />
+          <label class="time-picker" id="timePicker" title="计划时间（可不填）">
+            <span class="time-icon">⏰</span>
+            <span class="time-text" id="timeText">选择时间</span>
+            <input type="time" id="timeInput" />
+          </label>
           <span class="imp-toggle" id="impToggle" title="标记为重要">⭐ 重要</span>
           <button class="add-btn" id="addBtn">添加</button>
         </div>
@@ -301,6 +315,8 @@
 
     const taskInput = document.getElementById('taskInput');
     const timeInput = document.getElementById('timeInput');
+    const timePicker = document.getElementById('timePicker');
+    const timeText = document.getElementById('timeText');
     const impToggle = document.getElementById('impToggle');
     const addBtn = document.getElementById('addBtn');
     const listBox = document.getElementById('listBox');
@@ -611,6 +627,7 @@
       });
       taskInput.value = '';
       timeInput.value = '';
+      updateTimeDisplay();
       impOn = false;
       impToggle.classList.remove('on');
       save();
@@ -668,8 +685,22 @@
     }
 
     // ===== 事件绑定 =====
+    function updateTimeDisplay() {
+      if (timeInput.value) {
+        timeText.textContent = timeInput.value;
+        timePicker.classList.add('active');
+      } else {
+        timeText.textContent = '选择时间';
+        timePicker.classList.remove('active');
+      }
+    }
+
     addBtn.onclick = addTask;
     taskInput.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+    timeInput.addEventListener('change', updateTimeDisplay);
+    timePicker.addEventListener('click', e => {
+      if (e.target.tagName !== 'INPUT') timeInput.showPicker?.() || timeInput.focus();
+    });
     impToggle.onclick = () => { impOn = !impOn; impToggle.classList.toggle('on', impOn); };
     clearDoneBtn.onclick = clearDone;
     carryAllBtn.onclick = moveAllToToday;
