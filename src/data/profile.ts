@@ -2,6 +2,7 @@
 export const PROFILE = {
   name: '江宇梦',
   tagline: '一个正在用AI学习做产品的研二学生',
+  internship: '一周在岗5天',
   // 头像（后续由真实图片地址替换）
   avatarUrl:
     'https://miaoda-site-img.cdn.bcebos.com/images/MiaoTu_a16e37c5-8794-4207-b8dd-f8dec90afbf7.jpg',

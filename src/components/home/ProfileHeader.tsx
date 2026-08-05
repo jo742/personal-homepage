@@ -34,6 +34,12 @@ export default function ProfileHeader() {
         {PROFILE.tagline}
       </p>
 
+      {/* 实习安排 */}
+      <p className="relative z-10 mt-3 text-sm text-muted-foreground">
+        <span className="text-xs text-muted-foreground/70 mr-1.5">实习安排</span>
+        <span className="text-foreground font-medium">{PROFILE.internship}</span>
+      </p>
+
       {/* 聊天入口按钮 */}
       <Button 
         onClick={scrollToChat} 
