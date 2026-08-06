@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>今日日程 · 回答"我现在该做什么"</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .app { width: 100%; max-width: 560px; }
+
+    /* ===== 头部：日期 + 今日进度 ===== */
+    .header { text-align: center; color: #fff; margin-bottom: 20px; }
+    .header h1 { font-size: 28px; letter-spacing: 2px; margin-bottom: 4px; }
+    .header .date { font-size: 14px; opacity: 0.85; }
+
+    .progress-wrap { margin-top: 14px; }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 12px; opacity: 0.9; margin-bottom: 5px;
+    }
+    .progress-bar {
+      height: 8px; background: rgba(255, 255, 255, 0.25);
+      border-radius: 99px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; width: 0;
+      background: #fff; border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* ===== 卡片 ===== */
+    .card {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      padding: 18px; margin-bottom: 14px;
+    }
+
+    /* ===== 焦点区：现在该做 ===== */
+    .focus-card {
+      background: linear-gradient(135deg, #fff7ed, #fff);
+      border: 2px solid #f6ad55;
+    }
+    .focus-title {
+      font-size: 13px; font-weight: 700; color: #c05621;
+      letter-spacing: 1px; margin-bottom: 8px;
+    }
+    .focus-task { display: flex; align-items: center; gap: 12px; }
+    .focus-text { flex: 1; font-size: 17px; font-weight: 600; color: #2d3748; word-break: break-all; }
+    .focus-time { font-size: 13px; color: #c05621; white-space: nowrap; font-weight: 600; }
+    .focus-done-btn {
+      padding: 8px 18px; font-size: 14px; font-weight: 600;
+      color: #fff; background: linear-gradient(135deg, #ed8936, #dd6b20);
+      border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;
+    }
+    .focus-done-btn:hover { opacity: 0.9; }
+    .focus-empty { font-size: 14px; color: #a0aec0; }
+
+    /* ===== 昨日遗留 ===== */
+    .carry-card {
+      background: linear-gradient(135deg, #fff5f5, #fff);
+      border: 2px solid #fc8181;
+    }
+    .carry-head {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 6px;
+    }
+    .carry-title { font-size: 13px; font-weight: 700; color: #c53030; letter-spacing: 1px; }
+    .carry-all-btn {
+      padding: 6px 14px; font-size: 13px; font-weight: 600;
+      color: #fff; background: #e53e3e; border: none; border-radius: 8px; cursor: pointer;
+    }
+    .carry-all-btn:hover { opacity: 0.9; }
+    .carry-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 4px; border-bottom: 1px solid #fed7d7;
+    }
+    .carry-item:last-child { border-bottom: none; }
+    .carry-text { flex: 1; font-size: 14px; color: #4a5568; word-break: break-all; }
+    .carry-date { font-size: 11px; color: #e53e3e; white-space: nowrap; }
+    .mini-btn {
+      padding: 4px 10px; font-size: 12px; border-radius: 6px; cursor: pointer;
+      border: 1px solid #e2e8f0; background: #fff; color: #555; white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .mini-btn:hover { border-color: #667eea; color: #667eea; }
+    .mini-btn.danger:hover { border-color: #e53e3e; color: #e53e3e; background: #fff5f5; }
+
+    /* ===== 输入区 ===== */
+    .input-area { display: flex; flex-direction: column; gap: 10px; }
+    .input-row1 { display: flex; gap: 10px; }
+    .input-row1 input[type="text"] {
+      flex: 1; padding: 12px 14px; font-size: 15px;
+      border: 2px solid #e3e0f0; border-radius: 10px; outline: none;
+      transition: border-color 0.2s; min-width: 0;
+    }
+    .input-row1 input[type="text"]:focus { border-color: #667eea; }
+
+    .input-row2 { display: flex; gap: 10px; align-items: center; }
+    .time-picker {
+      position: relative;
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 12px; font-size: 14px;
+      border: 2px solid #e3e0f0; border-radius: 8px;
+      background: #fff; color: #555; cursor: pointer;
+      transition: border-color 0.2s; user-select: none;
+    }
+    .time-picker:hover { border-color: #667eea; }
+    .time-picker.active { border-color: #667eea; color: #667eea; }
+    .time-picker input[type="time"] {
+      position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; border: 0;
+    }
+    .time-picker .time-icon { font-size: 15px; }
+    .time-picker .time-text { white-space: nowrap; }
+    .imp-toggle {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 14px; color: #666; cursor: pointer; user-select: none;
+      padding: 8px 12px; border: 2px solid #e3e0f0; border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .imp-toggle.on { border-color: #f6ad55; color: #c05621; background: #fffaf0; }
+    .add-btn {
+      margin-left: auto;
+      padding: 10px 26px; font-size: 15px; font-weight: 600;
+      color: #fff; background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none; border-radius: 10px; cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s; white-space: nowrap;
+    }
+    .add-btn:hover { opacity: 0.9; }
+    .add-btn:active { transform: scale(0.97); }
+    .input-tip { font-size: 12px; color: #b0abcf; }
+
+    /* ===== 列表 ===== */
+    .group-title {
+      font-size: 13px; font-weight: 700; color: #8b85ad;
+      letter-spacing: 1px; margin: 14px 0 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .group-title:first-child { margin-top: 0; }
+    .group-count {
+      font-size: 11px; font-weight: 600; color: #fff;
+      background: #c5c0e0; border-radius: 99px; padding: 1px 8px;
+    }
+
+    .task-list { list-style: none; }
+    .task-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 6px; border-bottom: 1px solid #f0eef8;
+      animation: slideIn 0.25s ease;
+    }
+    .task-item:last-child { border-bottom: none; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .check {
+      width: 22px; height: 22px;
+      border: 2px solid #c5c0e0; border-radius: 50%;
+      cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; background: #fff;
+      color: transparent; font-size: 13px;
+    }
+    .check:hover { border-color: #667eea; }
+    .task-item.done .check {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-color: transparent; color: #fff;
+    }
+
+    .task-text {
+      flex: 1; font-size: 15px; color: #333; word-break: break-all;
+      cursor: text; border-radius: 4px;
+    }
+    .task-text:hover { background: #f7f6fc; }
+    .task-item.done .task-text { color: #b0b0b0; text-decoration: line-through; cursor: default; }
+    .task-item.done .task-text:hover { background: none; }
+
+    .edit-input {
+      flex: 1; font-size: 15px; color: #333; font-family: inherit;
+      border: 2px solid #667eea; border-radius: 6px; padding: 4px 8px; outline: none;
+      min-width: 0;
+    }
+
+    .imp-star { color: #f6ad55; font-size: 14px; flex-shrink: 0; }
+
+    .sched-time {
+      font-size: 13px; font-weight: 600; color: #667eea;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .overdue-badge {
+      font-size: 11px; font-weight: 600; color: #e53e3e;
+      background: #fff5f5; border: 1px solid #feb2b2;
+      border-radius: 99px; padding: 1px 8px; white-space: nowrap; flex-shrink: 0;
+    }
+    .task-item.overdue .sched-time { color: #e53e3e; }
+
+    .icon-btn {
+      border: none; background: none; color: #d0cce5;
+      font-size: 15px; cursor: pointer; padding: 4px 6px;
+      border-radius: 6px; transition: all 0.2s; flex-shrink: 0;
+    }
+    .icon-btn:hover { color: #667eea; background: #f0eefc; }
+    .icon-btn.del:hover { color: #e05f5f; background: #fdeeee; }
+
+    /* ===== 折叠组 ===== */
+    .fold-toggle {
+      width: 100%; border: none; background: none;
+      font-size: 13px; color: #8b85ad; cursor: pointer;
+      padding: 8px 0 2px; text-align: left; letter-spacing: 1px; font-weight: 700;
+    }
+    .fold-toggle:hover { color: #667eea; }
+
+    /* ===== 空状态 ===== */
+    .empty { text-align: center; color: #b8b3d6; padding: 28px 0; font-size: 14px; }
+    .empty .icon { font-size: 38px; margin-bottom: 8px; }
+
+    /* ===== 底部 ===== */
+    .footer-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0eef8;
+    }
+    .footer-tip { font-size: 12px; color: #aaa; }
+    .clear-done { border: none; background: none; color: #667eea; font-size: 13px; cursor: pointer; }
+    .clear-done:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .input-row2 { flex-wrap: wrap; }
+      .add-btn { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <div class="header">
+      <h1>📅 今日日程</h1>
+      <div class="date" id="today"></div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>今日进度</span><span id="progressText">0 / 0</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+    </div>
+
+    <!-- 昨日遗留：新的一天打开时优先处理 -->
+    <div class="card carry-card" id="carryCard" style="display:none;">
+      <div class="carry-head">
+        <span class="carry-title">📥 之前没做完的事</span>
+        <button class="carry-all-btn" id="carryAllBtn">全部移到今天</button>
+      </div>
+      <div id="carryList"></div>
+    </div>
+
+    <!-- 焦点区：现在该做什么 -->
+    <div class="card focus-card">
+      <div class="focus-title">⚡ 现在该做</div>
+      <div id="focusBox"><div class="focus-empty">暂无任务，先在下面添加一条吧</div></div>
+    </div>
+
+    <!-- 输入区 -->
+    <div class="card">
+      <div class="input-area">
+        <div class="input-row1">
+          <input type="text" id="taskInput" placeholder="要做什么？按回车快速添加" maxlength="100" />
+        </div>
+        <div class="input-row2">
+          <label class="time-picker" id="timePicker" title="计划时间（可不填）">
+            <span class="time-icon">⏰</span>
+            <span class="time-text" id="timeText">选择时间</span>
+            <input type="time" id="timeInput" />
+          </label>
+          <span class="imp-toggle" id="impToggle" title="标记为重要">⭐ 重要</span>
+          <button class="add-btn" id="addBtn">添加</button>
+        </div>
+        <div class="input-tip">时间和重要标记都可以不填——先记下来，比记得全更重要；点击任务文字可直接修改</div>
+      </div>
+    </div>
+
+    <!-- 任务列表 -->
+    <div class="card">
+      <div id="listBox"></div>
+      <div class="empty" id="emptyTip">
+        <div class="icon">🌱</div>
+        还没有任务，添加第一条开始今天的计划吧
+      </div>
+      <div class="footer-row" id="footerRow" style="display:none;">
+        <span class="footer-tip">数据保存在本机浏览器，刷新不丢失</span>
+        <button class="clear-done" id="clearDoneBtn">清除已完成</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'daily-todo-tasks';
+
+    // 任务数据：[{ id, text, done, sched: "HH:MM"|"", important, date: "YYYY-MM-DD" }]
+    let tasks = [];
+    let showDone = false;
+    let showDeferred = false;
+    let impOn = false;
+    let editingId = null;
+
+    const taskInput = document.getElementById('taskInput');
+    const timeInput = document.getElementById('timeInput');
+    const timePicker = document.getElementById('timePicker');
+    const timeText = document.getElementById('timeText');
+    const impToggle = document.getElementById('impToggle');
+    const addBtn = document.getElementById('addBtn');
+    const listBox = document.getElementById('listBox');
+    const emptyTip = document.getElementById('emptyTip');
+    const footerRow = document.getElementById('footerRow');
+    const clearDoneBtn = document.getElementById('clearDoneBtn');
+    const focusBox = document.getElementById('focusBox');
+    const carryCard = document.getElementById('carryCard');
+    const carryList = document.getElementById('carryList');
+    const carryAllBtn = document.getElementById('carryAllBtn');
+
+    // ===== 日期工具 =====
+    function dateStr(d) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function todayStr() { return dateStr(new Date()); }
+    function tomorrowStr() {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      return dateStr(d);
+    }
+    function nowHM() {
+      const t = new Date();
+      return `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
+    }
+
+    // ===== 顶部日期 =====
+    const now0 = new Date();
+    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    document.getElementById('today').textContent =
+      `${now0.getFullYear()}年${now0.getMonth() + 1}月${now0.getDate()}日 星期${weekdays[now0.getDay()]}`;
+
+    // ===== 本地存储（兼容旧版数据：无 date 字段的记为今天） =====
+    function load() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        tasks = raw.map(t => ({
+          id: t.id,
+          text: t.text,
+          done: !!t.done,
+          sched: typeof t.sched === 'string' ? t.sched : '',
+          important: !!t.important,
+          date: typeof t.date === 'string' ? t.date : todayStr()
+        }));
+      } catch (e) { tasks = []; }
+    }
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
+
+    // ===== 分组选择器 =====
+    const isToday   = t => t.date === todayStr();
+    const isCarry   = t => t.date < todayStr() && !t.done;   // 之前未完成的遗留
+    const isDeferred = t => t.date > todayStr() && !t.done;  // 推迟到明天的
+    function isOverdue(task) {
+      return isToday(task) && task.sched && !task.done && task.sched < nowHM();
+    }
+
+    // ===== 焦点任务：回答"现在该做什么" =====
+    // 规则：已过时 > 一小时内将开始 > 重要且无时间 > 最早的计划任务 > 任一未完成
+    function pickFocus() {
+      const undone = tasks.filter(t => isToday(t) && !t.done);
+      if (!undone.length) return null;
+      const timed = undone.filter(t => t.sched).sort((a, b) => a.sched.localeCompare(b.sched));
+      const overdue = timed.filter(isOverdue);
+      if (overdue.length) return { task: overdue[0], tag: '已过时，优先处理' };
+
+      // 一小时内将开始的任务优先于"重要"
+      const cur = nowHM();
+      const soon = timed.find(t => {
+        const [h1, m1] = cur.split(':').map(Number);
+        const [h2, m2] = t.sched.split(':').map(Number);
+        const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+        return diff >= 0 && diff <= 60;
+      });
+      if (soon) return { task: soon, tag: `即将开始 ${soon.sched}` };
+
+      const imp = undone.find(t => t.important && !t.sched);
+      if (imp) return { task: imp, tag: '重要' };
+      if (timed.length) return { task: timed[0], tag: `计划 ${timed[0].sched}` };
+      return { task: undone[0], tag: '随时可做' };
+    }
+
+    function renderFocus() {
+      const picked = pickFocus();
+      if (!picked) {
+        const carryCount = tasks.filter(isCarry).length;
+        const todayTotal = tasks.filter(isToday).length;
+        let msg = '暂无任务，先在下面添加一条吧';
+        if (carryCount) msg = '👆 先处理上面遗留的任务，或添加今天的新计划';
+        else if (todayTotal) msg = '🎉 今日任务全部完成，休息一下吧';
+        focusBox.innerHTML = `<div class="focus-empty">${msg}</div>`;
+        return;
+      }
+      focusBox.innerHTML = '';
+      const row = document.createElement('div');
+      row.className = 'focus-task';
+
+      const text = document.createElement('span');
+      text.className = 'focus-text';
+      text.textContent = (picked.task.important ? '⭐ ' : '') + picked.task.text;
+
+      const time = document.createElement('span');
+      time.className = 'focus-time';
+      time.textContent = picked.tag;
+
+      const btn = document.createElement('button');
+      btn.className = 'focus-done-btn';
+      btn.textContent = '完成 ✓';
+      btn.onclick = () => toggleTask(picked.task.id);
+
+      row.append(text, time, btn);
+      focusBox.appendChild(row);
+    }
+
+    // ===== 昨日遗留渲染 =====
+    function renderCarry() {
+      const list = tasks.filter(isCarry);
+      if (!list.length) { carryCard.style.display = 'none'; return; }
+      carryCard.style.display = '';
+      carryList.innerHTML = '';
+      list.forEach(task => {
+        const row = document.createElement('div');
+        row.className = 'carry-item';
+
+        const text = document.createElement('span');
+        text.className = 'carry-text';
+        text.textContent = (task.important ? '⭐ ' : '') + task.text;
+
+        const date = document.createElement('span');
+        date.className = 'carry-date';
+        date.textContent = task.date.slice(5).replace('-', '/');
+
+        const moveBtn = document.createElement('button');
+        moveBtn.className = 'mini-btn';
+        moveBtn.textContent = '移到今天';
+        moveBtn.onclick = () => moveToToday(task.id);
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'mini-btn danger';
+        delBtn.textContent = '不做了';
+        delBtn.onclick = () => deleteTask(task.id);
+
+        row.append(text, date, moveBtn, delBtn);
+        carryList.appendChild(row);
+      });
+    }
+
+    // ===== 任务行 =====
+    function makeItem(task, opts = {}) {
+      const li = document.createElement('li');
+      li.className = 'task-item' + (task.done ? ' done' : '') + (isOverdue(task) ? ' overdue' : '');
+
+      const check = document.createElement('span');
+      check.className = 'check';
+      check.textContent = '✓';
+      check.title = task.done ? '标记为未完成' : '标记为完成';
+      check.onclick = () => toggleTask(task.id);
+      li.append(check);
+
+      if (task.important) {
+        const star = document.createElement('span');
+        star.className = 'imp-star';
+        star.textContent = '⭐';
+        li.append(star);
+      }
+
+      // 文本：点击进入行内编辑（已完成的不可编辑）
+      if (editingId === task.id) {
+        const input = document.createElement('input');
+        input.className = 'edit-input';
+        input.value = task.text;
+        input.maxLength = 100;
+        input.onkeydown = e => {
+          if (e.key === 'Enter') commitEdit(task.id, input.value);
+          if (e.key === 'Escape') { editingId = null; render(); }
+        };
+        input.onblur = () => commitEdit(task.id, input.value);
+        li.append(input);
+        setTimeout(() => { input.focus(); input.select(); }, 0);
+      } else {
+        const text = document.createElement('span');
+        text.className = 'task-text';
+        text.textContent = task.text;
+        if (!task.done) {
+          text.title = '点击修改';
+          text.onclick = () => { editingId = task.id; render(); };
+        }
+        li.append(text);
+      }
+
+      if (task.sched) {
+        const st = document.createElement('span');
+        st.className = 'sched-time';
+        st.textContent = task.sched;
+        li.append(st);
+        if (isOverdue(task)) {
+          const ob = document.createElement('span');
+          ob.className = 'overdue-badge';
+          ob.textContent = '已过时';
+          li.append(ob);
+        }
+      }
+
+      if (opts.deferred) {
+        // 推迟组：提供"移回今天"
+        const back = document.createElement('button');
+        back.className = 'icon-btn';
+        back.textContent = '↩';
+        back.title = '移回今天';
+        back.onclick = () => moveToToday(task.id);
+        li.append(back);
+      } else if (!task.done) {
+        // 今日未完成：提供"明天再做"
+        const defer = document.createElement('button');
+        defer.className = 'icon-btn';
+        defer.textContent = '⏭';
+        defer.title = '明天再做';
+        defer.onclick = () => deferTask(task.id);
+        li.append(defer);
+      }
+
+      const del = document.createElement('button');
+      del.className = 'icon-btn del';
+      del.textContent = '✕';
+      del.title = '删除任务';
+      del.onclick = () => deleteTask(task.id);
+      li.append(del);
+
+      return li;
+    }
+
+    function renderGroup(title, list, opts) {
+      const wrap = document.createDocumentFragment();
+      const h = document.createElement('div');
+      h.className = 'group-title';
+      h.innerHTML = `${title} <span class="group-count">${list.length}</span>`;
+      const ul = document.createElement('ul');
+      ul.className = 'task-list';
+      list.forEach(t => ul.appendChild(makeItem(t, opts)));
+      wrap.append(h, ul);
+      return wrap;
+    }
+
+    function render() {
+      renderCarry();
+      renderFocus();
+      listBox.innerHTML = '';
+
+      const todays = tasks.filter(isToday);
+      const timed = todays.filter(t => !t.done && t.sched).sort((a, b) => a.sched.localeCompare(b.sched));
+      const untimed = todays.filter(t => !t.done && !t.sched)
+        .sort((a, b) => (b.important ? 1 : 0) - (a.important ? 1 : 0));
+      const doneList = todays.filter(t => t.done);
+      const deferredList = tasks.filter(isDeferred);
+
+      if (timed.length) listBox.appendChild(renderGroup('🕐 今日安排', timed));
+      if (untimed.length) listBox.appendChild(renderGroup('📌 随时可做', untimed));
+
+      if (deferredList.length) {
+        const toggle = document.createElement('button');
+        toggle.className = 'fold-toggle';
+        toggle.textContent = `${showDeferred ? '▾' : '▸'} ⏭ 明天再做（${deferredList.length}）`;
+        toggle.onclick = () => { showDeferred = !showDeferred; render(); };
+        listBox.appendChild(toggle);
+        if (showDeferred) {
+          const ul = document.createElement('ul');
+          ul.className = 'task-list';
+          deferredList.forEach(t => ul.appendChild(makeItem(t, { deferred: true })));
+          listBox.appendChild(ul);
+        }
+      }
+
+      if (doneList.length) {
+        const toggle = document.createElement('button');
+        toggle.className = 'fold-toggle';
+        toggle.textContent = `${showDone ? '▾' : '▸'} 已完成（${doneList.length}）`;
+        toggle.onclick = () => { showDone = !showDone; render(); };
+        listBox.appendChild(toggle);
+        if (showDone) {
+          const ul = document.createElement('ul');
+          ul.className = 'task-list';
+          doneList.forEach(t => ul.appendChild(makeItem(t)));
+          listBox.appendChild(ul);
+        }
+      }
+
+      // 进度只统计"今天"的任务：昨天的旧账不该稀释今天的成就感
+      const total = todays.length;
+      const done = doneList.length;
+      document.getElementById('progressText').textContent = `${done} / ${total}`;
+      document.getElementById('progressFill').style.width = total ? `${Math.round(done / total * 100)}%` : '0';
+
+      const anything = total + deferredList.length + tasks.filter(isCarry).length;
+      emptyTip.style.display = anything === 0 ? '' : 'none';
+      footerRow.style.display = anything === 0 ? 'none' : '';
+    }
+
+    // ===== 操作 =====
+    function addTask() {
+      const text = taskInput.value.trim();
+      if (!text) { taskInput.focus(); return; }
+      tasks.push({
+        id: Date.now(),
+        text,
+        done: false,
+        sched: timeInput.value || '',
+        important: impOn,
+        date: todayStr()
+      });
+      taskInput.value = '';
+      timeInput.value = '';
+      updateTimeDisplay();
+      impOn = false;
+      impToggle.classList.remove('on');
+      save();
+      render();
+      taskInput.focus();
+    }
+
+    function toggleTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) task.done = !task.done;
+      save();
+      render();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      save();
+      render();
+    }
+
+    function deferTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) { task.date = tomorrowStr(); task.sched = ''; }
+      save();
+      render();
+    }
+
+    function moveToToday(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) task.date = todayStr();
+      save();
+      render();
+    }
+
+    function moveAllToToday() {
+      tasks.filter(isCarry).forEach(t => { t.date = todayStr(); });
+      save();
+      render();
+    }
+
+    function commitEdit(id, value) {
+      const task = tasks.find(t => t.id === id);
+      const text = value.trim();
+      if (task && text) task.text = text;
+      editingId = null;
+      save();
+      render();
+    }
+
+    function clearDone() {
+      // 只清除今天的已完成；历史已完成早已不在视图中，一并清掉释放存储
+      tasks = tasks.filter(t => !t.done);
+      save();
+      render();
+    }
+
+    // ===== 事件绑定 =====
+    function updateTimeDisplay() {
+      if (timeInput.value) {
+        timeText.textContent = timeInput.value;
+        timePicker.classList.add('active');
+      } else {
+        timeText.textContent = '选择时间';
+        timePicker.classList.remove('active');
+      }
+    }
+
+    addBtn.onclick = addTask;
+    taskInput.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+    timeInput.addEventListener('change', updateTimeDisplay);
+    timePicker.addEventListener('click', e => {
+      if (e.target.tagName !== 'INPUT') timeInput.showPicker?.() || timeInput.focus();
+    });
+    impToggle.onclick = () => { impOn = !impOn; impToggle.classList.toggle('on', impOn); };
+    clearDoneBtn.onclick = clearDone;
+    carryAllBtn.onclick = moveAllToToday;
+
+    // 每分钟刷新：让"已过时"状态和焦点任务随时间自动更新（编辑中不打断）
+    setInterval(() => { if (editingId === null) render(); }, 60 * 1000);
+
+    // ===== 启动 =====
+    load();
+    render();
+  </script>
+</body>
+</html>
